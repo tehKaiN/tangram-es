@@ -45,6 +45,8 @@ MarkerID MarkerManager::add() {
     // Sort the marker list by draw order.
     std::stable_sort(m_markers.begin(), m_markers.end(), Marker::compareByDrawOrder);
 
+    m_markerCountChanged = true;
+
     // Return a handle for the marker.
     return id;
 
@@ -54,6 +56,7 @@ bool MarkerManager::remove(MarkerID markerID) {
     for (auto it = m_markers.begin(), end = m_markers.end(); it != end; ++it) {
         if (it->get()->id() == markerID) {
             m_markers.erase(it);
+            m_markerCountChanged = true;
             return true;
         }
     }
@@ -276,6 +279,8 @@ bool MarkerManager::setPolygon(MarkerID markerID, LngLat* coordinates, int* coun
 
 bool MarkerManager::update(int zoom) {
 
+    m_markerCountChanged = false;
+
     if (zoom == m_zoom) {
          return false;
     }
@@ -292,6 +297,7 @@ bool MarkerManager::update(int zoom) {
 
 void MarkerManager::removeAll() {
 
+    m_markerCountChanged = true;
     m_markers.clear();
 
 }

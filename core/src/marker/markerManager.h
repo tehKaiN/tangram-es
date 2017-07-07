@@ -63,6 +63,9 @@ public:
     // changes, all marker meshes are rebuilt.
     bool update(int zoom);
 
+    // returns true if any marker is added or removed
+    bool markerCountChanged() { return m_markerCountChanged; }
+
     // Remove and destroy all markers.
     void removeAll();
 
@@ -89,6 +92,7 @@ private:
 
     uint32_t m_idCounter = 0;
     int m_zoom = 0;
+    bool m_markerCountChanged = false;
 
 };
 

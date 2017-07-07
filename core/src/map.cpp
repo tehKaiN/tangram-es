@@ -360,6 +360,7 @@ bool Map::update(float _dt) {
 
     impl->view.update();
 
+    auto markerCountChanged = impl->markerManager.markerCountChanged();
     impl->markerManager.update(static_cast<int>(impl->view.getZoom()));
 
     for (const auto& style : impl->scene->styles()) {
@@ -380,7 +381,8 @@ bool Map::update(float _dt) {
         }
 
         if (impl->view.changedOnLastUpdate() ||
-            impl->tileManager.hasTileSetChanged()) {
+            impl->tileManager.hasTileSetChanged() ||
+            markerCountChanged) {
 
             for (const auto& tile : tiles) {
                 tile->update(_dt, impl->view);
