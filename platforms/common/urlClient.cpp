@@ -120,6 +120,7 @@ void UrlClient::curlLoop(uint32_t index) {
     char curlErrorString[CURL_ERROR_SIZE];
     // Set up an easy handle for reuse.
     auto handle = curl_easy_init();
+		curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, &curlWriteCallback);
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, &task.response);
     curl_easy_setopt(handle, CURLOPT_PROGRESSFUNCTION, &curlProgressCallback);
