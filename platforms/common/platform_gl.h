@@ -50,6 +50,14 @@ extern PFNGLGENVERTEXARRAYSOESPROC glGenVertexArraysOESEXT;
 #include <GLFW/glfw3.h>
 #endif // defined(TANGRAM_LINUX) || defined(TANGRAM_WINDOWS)
 
+#ifdef TANGRAM_WXWIDGETS
+#include <glad/glad.h>
+// Add missing stuff
+#define glDepthRangef(a, b) glDepthRange((double)(a), (double)(b))
+#define glClearDepthf(a) glClearDepth((double)(a))
+#include "../../core/src/gl.h"
+#endif // TANGRAM_WXWIDGETS
+
 #ifdef TANGRAM_RPI
 // Broadcom library for direct GPU access
 #include "bcm_host.h"
