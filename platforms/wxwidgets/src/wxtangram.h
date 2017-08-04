@@ -32,6 +32,7 @@ private:
 	void OnMouseDown(wxMouseEvent &evt);
 	void OnMouseUp(wxMouseEvent &evt);
 	void OnMouseMove(wxMouseEvent &evt);
+	void OnMouseWheel(wxMouseEvent &evt);
 	void OnRenderTimer(wxTimerEvent &evt);
 	void OnResize(wxSizeEvent &evt);
 	void Render(void);
@@ -49,6 +50,12 @@ private:
 	double m_lastTimeMoved;
 	double m_lastXVelocity;
 	double m_lastYVelocity;
+	
+	double m_tilt = 0;
+	double m_rotation = 0;
+	
+	const double m_scrollSpanMultiplier = 0.1; // scaling for zoom and rotation
+	const double m_scrollDistanceMultiplier = 0.1; // scaling for shove
 };
 
 #endif // _WX_TANGRAM_H_

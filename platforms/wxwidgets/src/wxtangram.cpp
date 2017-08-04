@@ -26,19 +26,18 @@ wxTangram::wxTangram(wxWindow *parent,
 	m_ctx(new wxGLContext(this)),
 	m_renderTimer(this)
 {
-	// Event callbacks
+	// Mouse events
 	Connect(id, wxEVT_PAINT, wxPaintEventHandler(OnPaint));
 	Connect(id, wxEVT_LEFT_DOWN, wxMouseEventHandler(OnMouseDown));
 	Connect(id, wxEVT_LEFT_UP, wxMouseEventHandler(OnMouseUp));
 	Connect(id, wxEVT_MOTION, wxMouseEventHandler(OnMouseMove));
-	Connect(id, wxEVT_TIMER, wxTimerEventHandler(OnRenderTimer));
+	Connect(id, wxEVT_MOUSEWHEEL, wxMouseEventHandler(OnMouseWheel));
+	
+	// Resize event
 	Connect(id, wxEVT_SIZE, wxSizeEventHandler(OnResize));
-	// framebufferResizeCallback(main_window, fWidth, fHeight);
-   // Set input callbacks
-	// glfwSetMouseButtonCallback(main_window, mouseButtonCallback);
-	// glfwSetCursorPosCallback(main_window, cursorMoveCallback);
-	// glfwSetScrollCallback(main_window, scrollCallback);
-	// glfwSetDropCallback(main_window, dropCallback);
+	
+	// Render timer
+	Connect(id, wxEVT_TIMER, wxTimerEventHandler(OnRenderTimer));
 	
 	// Start render timer
 	m_renderTimer.StartOnce(1000/60.0);
@@ -46,6 +45,29 @@ wxTangram::wxTangram(wxWindow *parent,
 
 Tangram::Map &wxTangram::GetMap() {
 	return *m_map;
+}
+
+void wxTangram::OnMouseWheel(wxMouseEvent &evt)
+{
+	if(evt.GetWheelAxis() != wxMOUSE_WHEEL_VERTICAL)
+		return;
+
+	double x = evt.GetX() * m_density;
+	double y = evt.GetY() * m_density;
+	bool rotating = wxGetKeyState(WXK_ALT);
+	bool shoving = wxGetKeyState(WXK_SHIFT);
+	int rotation = evt.GetWheelRotation() / evt.GetWheelDelta();
+
+	if(shoving) {
+		m_tilt += rotation * 0.05 * 2*M_PI;
+		m_map->setTilt(m_tilt);
+		// m_map->handleShoveGesture(m_scrollDistanceMultiplier * rotation);
+	}
+	else if(rotating) {
+		m_map->handleRotateGesture(x, y, m_scrollSpanMultiplier * rotation);
+	}
+	else
+		m_map->handlePinchGesture(x, y, 1.0 + m_scrollSpanMultiplier * rotation, 0.f);
 }
 
 void wxTangram::OnResize(wxSizeEvent &evt)
