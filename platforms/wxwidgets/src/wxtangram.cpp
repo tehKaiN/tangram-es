@@ -44,6 +44,10 @@ wxTangram::wxTangram(wxWindow *parent,
 	m_renderTimer.StartOnce(1000/60.0);
 }
 
+Tangram::Map &wxTangram::GetMap() {
+	return *m_map;
+}
+
 void wxTangram::OnResize(wxSizeEvent &evt)
 {
 	if(!m_wasInit)

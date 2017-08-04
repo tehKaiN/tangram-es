@@ -18,6 +18,7 @@ public:
 						const wxString& api = "");
 	~wxTangram(void);
 	void PaintNow(void);
+	Tangram::Map &GetMap();
 	
 protected:
 	// Core stuff
