@@ -25,7 +25,7 @@ endif()
 
 check_unsupported_compiler_version()
 
-add_definitions(-DTANGRAM_WINDOWS)
+add_definitions(-DTANGRAM_WXWIDGETS)
 
 # load core library
 add_subdirectory(${PROJECT_SOURCE_DIR}/core)
@@ -34,53 +34,38 @@ if(TANGRAM_APPLICATION)
 
   set(EXECUTABLE_NAME "wxtangram")
 
-  get_mapzen_api_key(MAPZEN_API_KEY)
-  add_definitions(-DMAPZEN_API_KEY="${MAPZEN_API_KEY}")
-
   find_package(OpenGL REQUIRED)
 	find_package(CURL REQUIRED)
+	
+	# wxWidgets
 	find_package(wxWidgets REQUIRED gl adv core base)
 	include(${wxWidgets_USE_FILE})
-
-
-  # Build GLFW.
-  # if (TANGRAM_USE_SYSTEM_GLFW_LIBS)
-    # include(FindPkgConfig)
-    # pkg_check_modules(GLFW REQUIRED glfw3)
-  # else()
-    # configure GLFW to build only the library
-    # set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs")
-    # set(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs")
-    # set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation")
-    # set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target")
-    # add_subdirectory(${PROJECT_SOURCE_DIR}/platforms/common/glfw)
-  # endif()
+	
+	set(LIB_PATH "${CMAKE_BINARY_DIR}/lib")
 	
   add_library(${EXECUTABLE_NAME}
     ${PROJECT_SOURCE_DIR}/platforms/wxwidgets/src/wxtangram.cpp
-    # ${PROJECT_SOURCE_DIR}/platforms/windows/src/main.cpp
-    # ${PROJECT_SOURCE_DIR}/platforms/common/platform_gl.cpp
-    # ${PROJECT_SOURCE_DIR}/platforms/common/urlClient.cpp
-    # ${PROJECT_SOURCE_DIR}/platforms/common/glfwApp.cpp
-    # ${PROJECT_SOURCE_DIR}/platforms/common/glad.c
-    )
+    ${PROJECT_SOURCE_DIR}/platforms/wxwidgets/src/wxtangramplatform.cpp
+    ${PROJECT_SOURCE_DIR}/platforms/common/urlClient.cpp
+    ${PROJECT_SOURCE_DIR}/platforms/common/platform_gl.cpp
+    ${PROJECT_SOURCE_DIR}/platforms/common/glad.c
+  )
 		
   target_include_directories(${EXECUTABLE_NAME}
     PUBLIC
-    # ${GLFW_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/platforms/common
-		${CURL_INCLUDE_DIRS})
+		${CURL_INCLUDE_DIRS}
+	)
 		
   target_link_libraries(${EXECUTABLE_NAME}
     ${CORE_LIBRARY}
 		${CURL_LIBRARIES}
-    # glfw
     # only used when not using external lib
     -pthread
-    # ${GLFW_LIBRARIES}
     ${OPENGL_LIBRARIES}
-		${wxWidgets_LIBRARIES})
+		${wxWidgets_LIBRARIES}
+	)
 
   add_resources(${EXECUTABLE_NAME} "${PROJECT_SOURCE_DIR}/scenes")
-
+	
 endif()
