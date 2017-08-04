@@ -46,6 +46,8 @@ private:
 	wxPoint m_lastPosDown;
 	bool m_wasPanning = false;
 	double m_lastTimeMoved;
+	double m_lastXVelocity;
+	double m_lastYVelocity;
 };
 
 #endif // _WX_TANGRAM_H_

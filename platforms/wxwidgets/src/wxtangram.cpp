@@ -1,10 +1,18 @@
 #include "wxtangram.h"
 #include <memory>
+#include <algorithm>
 #include "map.h"
 #include "wxTangramPlatform.h"
 #include "data/clientGeoJsonSource.h"
 
-// cmake ../.. -DPLATFORM_TARGET=wxwidgets -G "MinGW Makefiles"
+template <typename T> T clamp(T x, T min, T max)
+{
+	if(x < min)
+		return min;
+	if(x > max)
+		return max;
+	return x;
+}
 
 wxTangram::wxTangram(wxWindow *parent,
 										wxWindowID id,
@@ -15,8 +23,8 @@ wxTangram::wxTangram(wxWindow *parent,
 										const wxString& api)
 	:wxGLCanvas(parent, id, NULL, pos, size, 0, name),
 	m_api(api),
-	m_renderTimer(this),
-	m_ctx(new wxGLContext(this))
+	m_ctx(new wxGLContext(this)),
+	m_renderTimer(this)
 {
 	// Event callbacks
 	Connect(id, wxEVT_PAINT, wxPaintEventHandler(OnPaint));
@@ -53,15 +61,24 @@ void wxTangram::OnRenderTimer(wxTimerEvent &evt)
 
 void wxTangram::OnMouseUp(wxMouseEvent &evt)
 {
-	m_wasPanning = false;
+	if(evt.LeftUp()) {
+		auto vx = clamp(m_lastXVelocity, -2000.0, 2000.0);
+		auto vy = clamp(m_lastYVelocity, -2000.0, 2000.0);
+		m_map->handleFlingGesture(
+			evt.GetX() * m_density,
+			evt.GetY() * m_density,
+			vx, vy
+		);
+		m_wasPanning = false;
+	}
 }
 
 void wxTangram::OnMouseDown(wxMouseEvent &evt)
 {
 	if(evt.LeftDown()) {
 		m_lastTimeMoved = wxGetUTCTimeMillis().ToDouble()/1000.0;
-		m_lastPosDown.x = evt.GetX();
-		m_lastPosDown.y = evt.GetY();
+		m_lastPosDown.x = evt.GetX() * m_density;
+		m_lastPosDown.y = evt.GetY() * m_density;
 	}
 }
 
@@ -79,8 +96,8 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 		}
 
 		m_wasPanning = true;
-		// last_x_velocity = (x - m_lastPosDown.x) / (time - m_lastTimeMoved);
-		// last_y_velocity = (y - m_lastPosDown.y) / (time - m_lastTimeMoved);
+		m_lastXVelocity = (x - m_lastPosDown.x) / (time - m_lastTimeMoved);
+		m_lastYVelocity = (y - m_lastPosDown.y) / (time - m_lastTimeMoved);
 		m_lastPosDown.x = x;
 		m_lastPosDown.y = y;
 
