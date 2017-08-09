@@ -21,23 +21,23 @@ wxTangram::wxTangram(wxWindow *parent,
 										long style,
 										const wxString& name,
 										const wxString& api)
-	:wxGLCanvas(parent, id, NULL, pos, size, 0, name),
+	:wxGLCanvas(parent, id, NULL, pos, size, style, name),
 	m_api(api),
 	m_ctx(new wxGLContext(this)),
 	m_renderTimer(this)
 {
 	// Mouse events
-	Connect(id, wxEVT_PAINT, wxPaintEventHandler(OnPaint));
-	Connect(id, wxEVT_LEFT_DOWN, wxMouseEventHandler(OnMouseDown));
-	Connect(id, wxEVT_LEFT_UP, wxMouseEventHandler(OnMouseUp));
-	Connect(id, wxEVT_MOTION, wxMouseEventHandler(OnMouseMove));
-	Connect(id, wxEVT_MOUSEWHEEL, wxMouseEventHandler(OnMouseWheel));
+	Bind(wxEVT_PAINT, OnPaint, this);
+	Bind(wxEVT_LEFT_DOWN, OnMouseDown, this);
+	Bind(wxEVT_LEFT_UP, OnMouseUp, this);
+	Bind(wxEVT_MOTION, OnMouseMove, this);
+	Bind(wxEVT_MOUSEWHEEL, OnMouseWheel, this);
 	
 	// Resize event
-	Connect(id, wxEVT_SIZE, wxSizeEventHandler(OnResize));
+	Bind(wxEVT_SIZE, OnResize, this);
 	
 	// Render timer
-	Connect(id, wxEVT_TIMER, wxTimerEventHandler(OnRenderTimer));
+	Bind(wxEVT_TIMER, OnRenderTimer, this);
 	
 	// Start render timer
 	m_renderTimer.StartOnce(1000/60.0);
