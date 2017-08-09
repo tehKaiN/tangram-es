@@ -15,13 +15,12 @@
 namespace Tangram {
 
 void logMsg(const char* fmt, ...) {
-	FILE *f = fopen("tangram.log", "a");
+	char bfr[2048];
 	va_list args;
 	va_start(args, fmt);
-	vfprintf(f, fmt, args);
+	vsprintf(bfr, fmt, args);
+	wxLogMessage(bfr);
 	va_end(args);
-	fflush(f);
-	fclose(f);
 }
 
 wxTangramPlatform::wxTangramPlatform(wxTangram *parent):
