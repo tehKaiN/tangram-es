@@ -11,11 +11,11 @@ class wxTangram: public wxGLCanvas
 public:
 	wxTangram(wxWindow *parent,
 	          wxWindowID id = wxID_ANY,
+						const wxString& name = wxGLCanvasName,
+						const wxString& api = "",
 						const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            long style = 0,
-            const wxString& name = wxGLCanvasName,
-						const wxString& api = "");
+            long style = wxFULL_REPAINT_ON_RESIZE);
 	~wxTangram(void);
 	void PaintNow(void);
 	Tangram::Map &GetMap();
@@ -25,6 +25,7 @@ protected:
 	Tangram::Map* m_map = nullptr;
 	bool m_wasInit = false;
 	wxString m_api;
+	wxGLContext *m_ctx;
 	
 private:
 	// Event handlers
@@ -35,10 +36,9 @@ private:
 	void OnMouseWheel(wxMouseEvent &evt);
 	void OnRenderTimer(wxTimerEvent &evt);
 	void OnResize(wxSizeEvent &evt);
-	void Render(void);
+	virtual void Render(void);
 	
 	// Stuff for rendering
-	wxGLContext *m_ctx;
 	wxMutex m_renderMutex;
 	wxTimer m_renderTimer;
 	double m_lastTime;

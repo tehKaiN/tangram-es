@@ -16,12 +16,12 @@ template <typename T> T clamp(T x, T min, T max)
 
 wxTangram::wxTangram(wxWindow *parent,
 										wxWindowID id,
+										const wxString& name,
+										const wxString& api,
 										const wxPoint& pos,
 										const wxSize& size,
-										long style,
-										const wxString& name,
-										const wxString& api)
-	:wxGLCanvas(parent, id, NULL, pos, size, style, name),
+										long style):
+	wxGLCanvas(parent, id, NULL, pos, size, style, name),
 	m_api(api),
 	m_ctx(new wxGLContext(this)),
 	m_renderTimer(this)
@@ -162,9 +162,9 @@ void wxTangram::Render(void)
 	// Render
 	if(!m_wasInit) {
 		if (!gladLoadGL()) {
-				Tangram::logMsg("GLAD: Failed to initialize OpenGL context");
-				m_renderMutex.Unlock();
-				return;
+			Tangram::logMsg("GLAD: Failed to initialize OpenGL context");
+			m_renderMutex.Unlock();
+			return;
 		}
 		else {
 			Tangram::logMsg("GLAD: Loaded OpenGL");
@@ -173,9 +173,9 @@ void wxTangram::Render(void)
 		// Setup Tangram
 		std::string sceneFile = "scene.yaml";
 		if (!m_map) {
-				m_map = new Tangram::Map(std::make_shared<Tangram::wxTangramPlatform>(this));
-				m_map->loadSceneAsync(sceneFile.c_str(), true, {}, nullptr,
-								{Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())});
+			m_map = new Tangram::Map(std::make_shared<Tangram::wxTangramPlatform>(this));
+			m_map->loadSceneAsync(sceneFile.c_str(), true, {}, nullptr,
+							{Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())});
 		}
 
 		m_map->setupGL();
@@ -188,8 +188,13 @@ void wxTangram::Render(void)
 	Tangram::GL::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	// End of Tangram::GL hackfix
 	
-	m_map->update(delta);
-	m_map->render();
+	try {
+		m_map->update(delta);
+		m_map->render();
+	}
+	catch(...) {
+		Tangram::logMsg("TANGRAM: Unknown render error");
+	}
 	// Swap front and back buffers
 	SwapBuffers();
 
