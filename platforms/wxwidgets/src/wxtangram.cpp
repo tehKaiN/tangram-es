@@ -49,25 +49,15 @@ Tangram::Map &wxTangram::GetMap() {
 
 void wxTangram::OnMouseWheel(wxMouseEvent &evt)
 {
+	if(!m_wasInit)
+		return;
 	if(evt.GetWheelAxis() != wxMOUSE_WHEEL_VERTICAL)
 		return;
 
 	double x = evt.GetX() * m_density;
 	double y = evt.GetY() * m_density;
-	bool rotating = wxGetKeyState(WXK_ALT);
-	bool shoving = wxGetKeyState(WXK_SHIFT);
 	int rotation = evt.GetWheelRotation() / evt.GetWheelDelta();
-
-	if(shoving) {
-		m_tilt += rotation * 0.05 * 2*M_PI;
-		m_map->setTilt(m_tilt);
-		// m_map->handleShoveGesture(m_scrollDistanceMultiplier * rotation);
-	}
-	else if(rotating) {
-		m_map->handleRotateGesture(x, y, m_scrollSpanMultiplier * rotation);
-	}
-	else
-		m_map->handlePinchGesture(x, y, 1.0 + m_scrollSpanMultiplier * rotation, 0.f);
+	m_map->handlePinchGesture(x, y, 1.0 + m_scrollSpanMultiplier * rotation, 0.f);
 }
 
 void wxTangram::OnResize(wxSizeEvent &evt)
@@ -87,6 +77,8 @@ void wxTangram::OnRenderTimer(wxTimerEvent &evt)
 
 void wxTangram::OnMouseUp(wxMouseEvent &evt)
 {
+	if(!m_wasInit)
+		return;
 	if(evt.LeftUp()) {
 		auto vx = clamp(m_lastXVelocity, -2000.0, 2000.0);
 		auto vy = clamp(m_lastYVelocity, -2000.0, 2000.0);
@@ -101,18 +93,18 @@ void wxTangram::OnMouseUp(wxMouseEvent &evt)
 
 void wxTangram::OnMouseDown(wxMouseEvent &evt)
 {
-	if(evt.LeftDown()) {
+	if(!m_wasInit)
+		return;
+	if(evt.LeftDown())
 		m_lastTimeMoved = wxGetUTCTimeMillis().ToDouble()/1000.0;
-		m_lastPosDown.x = evt.GetX() * m_density;
-		m_lastPosDown.y = evt.GetY() * m_density;
-	}
 }
 
 void wxTangram::OnMouseMove(wxMouseEvent &evt)
 {
+	if(!m_wasInit)
+		return;
 	double x = evt.GetX() * m_density;
 	double y = evt.GetY() * m_density;
-
 	double time = wxGetUTCTimeMillis().ToDouble()/1000.0;
 
 	if (evt.LeftIsDown()) {
@@ -124,11 +116,23 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 		m_wasPanning = true;
 		m_lastXVelocity = (x - m_lastPosDown.x) / (time - m_lastTimeMoved);
 		m_lastYVelocity = (y - m_lastPosDown.y) / (time - m_lastTimeMoved);
-		m_lastPosDown.x = x;
-		m_lastPosDown.y = y;
-
+	}
+	else if(evt.RightIsDown()) {
+		// Could be rotating around any point, e.g. one where RMB was pressed,
+		// but it's kinda trippy when controlling using PC mouse.
+		m_map->handleRotateGesture(
+			m_map->getViewportWidth()/2, m_map->getViewportHeight()/2,
+			(x - m_lastPosDown.x) * 0.01
+		);
+		
+		// handleShoveGesture() doesn't work, idk why.
+		m_tilt += (m_lastPosDown.y - y) * 0.001 * 2*M_PI;
+		m_tilt = clamp(m_tilt, 0.0, (90.0-12.0)/360.0*2*M_PI);
+		m_map->setTilt(m_tilt);
 	}
 
+	m_lastPosDown.x = x;
+	m_lastPosDown.y = y;
 	m_lastTimeMoved = time;
 
 }
@@ -143,17 +147,32 @@ wxTangram::~wxTangram(void)
 void wxTangram::PaintNow(void)
 {
 	wxClientDC dc(this);
-	Render();
+	Prerender();
 }
 
-void wxTangram::Render(void)
+void wxTangram::Prerender(void)
 {
+	// Make GL context access exclusive
 	if(m_renderMutex.TryLock() != wxMUTEX_NO_ERROR)
 		return;
+	
+	// Select GL context
 	if(!SetCurrent(*m_ctx)) {
 		m_renderMutex.Unlock();
 		return;
 	}
+	
+	// Do the actual rendering
+	Render();
+	
+	// Swap front and back buffers
+	SwapBuffers();
+
+	m_renderMutex.Unlock();
+}
+
+void wxTangram::Render(void)
+{
 	// Get delta between frames
 	double currentTime = wxGetUTCTimeMillis().ToDouble()/1000.0;
 	double delta = currentTime - m_lastTime;
@@ -195,14 +214,10 @@ void wxTangram::Render(void)
 	catch(...) {
 		Tangram::logMsg("TANGRAM: Unknown render error");
 	}
-	// Swap front and back buffers
-	SwapBuffers();
-
-	m_renderMutex.Unlock();
 }
 
 void wxTangram::OnPaint(wxPaintEvent &evt)
 {
 	wxPaintDC(this); // Required here
-	Render();
+	Prerender();
 }

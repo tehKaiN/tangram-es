@@ -6,6 +6,10 @@
 #include <wx/glcanvas.h>
 #include "../../../core/include/tangram/map.h"
 
+// So that project using those map doesn't need to include own GLM
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/transform.hpp"
+
 class wxTangram: public wxGLCanvas
 {
 public:
@@ -15,7 +19,7 @@ public:
 						const wxString& api = "",
 						const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            long style = wxFULL_REPAINT_ON_RESIZE);
+            long style = 0);
 	~wxTangram(void);
 	void PaintNow(void);
 	Tangram::Map &GetMap();
@@ -26,6 +30,7 @@ protected:
 	bool m_wasInit = false;
 	wxString m_api;
 	wxGLContext *m_ctx;
+	virtual void Render(void);
 	
 private:
 	// Event handlers
@@ -36,7 +41,8 @@ private:
 	void OnMouseWheel(wxMouseEvent &evt);
 	void OnRenderTimer(wxTimerEvent &evt);
 	void OnResize(wxSizeEvent &evt);
-	virtual void Render(void);
+	
+	void Prerender(void);
 	
 	// Stuff for rendering
 	wxMutex m_renderMutex;
