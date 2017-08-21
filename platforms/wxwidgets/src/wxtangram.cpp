@@ -24,6 +24,7 @@ wxTangram::wxTangram(wxWindow *parent,
 	wxGLCanvas(parent, id, NULL, pos, size, style, name),
 	m_api(api),
 	m_ctx(new wxGLContext(this)),
+	m_map(new Tangram::Map(std::make_shared<Tangram::wxTangramPlatform>(this))),
 	m_renderTimer(this)
 {
 	// Mouse events
@@ -49,7 +50,7 @@ Tangram::Map &wxTangram::GetMap() {
 
 void wxTangram::OnMouseWheel(wxMouseEvent &evt)
 {
-	if(!m_wasInit)
+	if(!m_wasMapInit)
 		return;
 	if(evt.GetWheelAxis() != wxMOUSE_WHEEL_VERTICAL)
 		return;
@@ -62,7 +63,7 @@ void wxTangram::OnMouseWheel(wxMouseEvent &evt)
 
 void wxTangram::OnResize(wxSizeEvent &evt)
 {
-	if(!m_wasInit)
+	if(!m_wasMapInit)
 		return;
 	m_map->resize(GetSize().x, GetSize().y);
 	Update();
@@ -71,13 +72,13 @@ void wxTangram::OnResize(wxSizeEvent &evt)
 void wxTangram::OnRenderTimer(wxTimerEvent &evt)
 {
 	wxStopWatch sw;
-	PaintNow();
+	Refresh();
 	m_renderTimer.StartOnce(std::max(1.0, 1000/60.0 - sw.Time())); 
 }
 
 void wxTangram::OnMouseUp(wxMouseEvent &evt)
 {
-	if(!m_wasInit)
+	if(!m_wasMapInit)
 		return;
 	if(evt.LeftUp()) {
 		auto vx = clamp(m_lastXVelocity, -2000.0, 2000.0);
@@ -93,7 +94,7 @@ void wxTangram::OnMouseUp(wxMouseEvent &evt)
 
 void wxTangram::OnMouseDown(wxMouseEvent &evt)
 {
-	if(!m_wasInit)
+	if(!m_wasMapInit)
 		return;
 	if(evt.LeftDown())
 		m_lastTimeMoved = wxGetUTCTimeMillis().ToDouble()/1000.0;
@@ -101,7 +102,7 @@ void wxTangram::OnMouseDown(wxMouseEvent &evt)
 
 void wxTangram::OnMouseMove(wxMouseEvent &evt)
 {
-	if(!m_wasInit)
+	if(!m_wasMapInit)
 		return;
 	double x = evt.GetX() * m_density;
 	double y = evt.GetY() * m_density;
@@ -144,29 +145,43 @@ wxTangram::~wxTangram(void)
 	}
 }
 
-void wxTangram::PaintNow(void)
-{
-	wxClientDC dc(this);
-	Prerender();
-}
-
 void wxTangram::Prerender(void)
 {
 	// Make GL context access exclusive
 	if(m_renderMutex.TryLock() != wxMUTEX_NO_ERROR)
 		return;
 	
-	// Select GL context
-	if(!SetCurrent(*m_ctx)) {
-		m_renderMutex.Unlock();
-		return;
+	if(IsShown()) {
+		// Select GL context
+		if(!SetCurrent(*m_ctx)) {
+			m_renderMutex.Unlock();
+			return;
+		}
+		
+		// Load OpenGL
+		if(!m_wasGlInit) {
+			if (!gladLoadGL()) {
+				Tangram::logMsg("GLAD: Failed to initialize OpenGL context");
+				m_renderMutex.Unlock();
+				return;
+			}
+			else {
+				Tangram::logMsg("GLAD: Loaded OpenGL");
+			}
+			
+			// Clear context with default background color.
+			// TODO: something better
+			Tangram::GL::clearColor(240/255.0f, 235/255.0f, 235/255.0f, 1.0f);
+			SwapBuffers();
+			m_wasGlInit = true;
+		}
+	
+		// Do the actual rendering
+		Render();
+		
+		// Swap front and back buffers
+		SwapBuffers();
 	}
-	
-	// Do the actual rendering
-	Render();
-	
-	// Swap front and back buffers
-	SwapBuffers();
 
 	m_renderMutex.Unlock();
 }
@@ -179,34 +194,23 @@ void wxTangram::Render(void)
 	m_lastTime = currentTime;
 	
 	// Render
-	if(!m_wasInit) {
-		if (!gladLoadGL()) {
-			Tangram::logMsg("GLAD: Failed to initialize OpenGL context");
-			m_renderMutex.Unlock();
-			return;
-		}
-		else {
-			Tangram::logMsg("GLAD: Loaded OpenGL");
-		}
-		
+	if(!m_wasMapInit) {
 		// Setup Tangram
 		std::string sceneFile = "scene.yaml";
-		if (!m_map) {
-			m_map = new Tangram::Map(std::make_shared<Tangram::wxTangramPlatform>(this));
-			m_map->loadSceneAsync(sceneFile.c_str(), true, {}, nullptr,
-							{Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())});
-		}
+		m_map->loadSceneAsync(
+			sceneFile.c_str(), true, {}, nullptr,
+			{Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())}
+		);
 
 		m_map->setupGL();
-		m_wasInit = true;
+		
+		// This stuff must be here or else main project inheriting from
+		// wxTangram will have link errors about undefined reference to
+		// Tangram::GL functions. This is kinda hackish and could be fixed later.
+		glClearColor(240/255.0f, 235/255.0f, 235/255.0f, 1.0f);
+		m_wasMapInit = true;
 	}
-	
-	// This stuff must be here or else main project will have link errors about
-	// undefined reference to Tangram::GL functions.
-	// This is kinda hackish and should be fixed later.
-	Tangram::GL::clearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	// End of Tangram::GL hackfix
-	
+		
 	try {
 		m_map->update(delta);
 		m_map->render();

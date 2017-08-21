@@ -21,15 +21,16 @@ public:
             const wxSize& size = wxDefaultSize,
             long style = 0);
 	~wxTangram(void);
-	void PaintNow(void);
 	Tangram::Map &GetMap();
 	
 protected:
 	// Core stuff
-	Tangram::Map* m_map = nullptr;
-	bool m_wasInit = false;
+	bool m_wasGlInit = false;
+	bool m_wasMapInit = false;
 	wxString m_api;
 	wxGLContext *m_ctx;
+	Tangram::Map* m_map = nullptr;
+	
 	virtual void Render(void);
 	
 private:

@@ -38,7 +38,7 @@ wxTangramPlatform::~wxTangramPlatform() {}
 
 void wxTangramPlatform::requestRender() const
 {
-    m_parent->PaintNow();
+	m_parent->Refresh();
 }
 
 std::vector<Tangram::FontSourceHandle> wxTangramPlatform::systemFontFallbacksHandle() const
