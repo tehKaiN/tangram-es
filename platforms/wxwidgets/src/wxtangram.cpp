@@ -66,7 +66,7 @@ void wxTangram::OnResize(wxSizeEvent &evt)
 	if(!m_wasMapInit)
 		return;
 	m_map->resize(GetSize().x, GetSize().y);
-	Update();
+	Refresh();
 }
 
 void wxTangram::OnRenderTimer(wxTimerEvent &evt)
@@ -203,6 +203,7 @@ void wxTangram::Render(void)
 		);
 
 		m_map->setupGL();
+		m_map->resize(GetSize().x, GetSize().y);
 		
 		// This stuff must be here or else main project inheriting from
 		// wxTangram will have link errors about undefined reference to
