@@ -693,6 +693,19 @@ bool Map::lngLatToScreenPosition(double _lng, double _lat, double* _x, double* _
     return !clipped && withinViewport;
 }
 
+void Map::lngLatToGlPosition(double _lng, double _lat, double *_x, double *_y)
+{
+	auto posMeters = impl->view.getMapProjection().LonLatToMeters({_lng, _lat});
+	auto viewPos = impl->view.getPosition();
+	*_x = posMeters.x - viewPos.x;
+	*_y = posMeters.y - viewPos.y;
+}
+
+glm::mat4 Map::getViewProjectionMatrix(void)
+{
+	return impl->view.getViewProjectionMatrix();
+}
+
 void Map::setPixelScale(float _pixelsPerPoint) {
 
     impl->setPixelScale(_pixelsPerPoint);

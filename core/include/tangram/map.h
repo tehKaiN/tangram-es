@@ -2,6 +2,7 @@
 
 #include "data/properties.h"
 #include "util/types.h"
+#include "glm/mat4x4.hpp"
 
 #include <array>
 #include <functional>
@@ -211,6 +212,10 @@ public:
     // corresponding point in screen space (x right, y down); returns false if the
     // point is not visible on the screen, otherwise returns true
     bool lngLatToScreenPosition(double _lng, double _lat, double* _x, double* _y);
+		
+		void lngLatToGlPosition(double _lng, double _lat, double *_x, double *_y);
+		
+		glm::mat4 getViewProjectionMatrix(void);
 
     // Add a tile source for adding drawable map data, which will be styled
     // according to the scene file using the provided data source name;
