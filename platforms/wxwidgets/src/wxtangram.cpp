@@ -197,10 +197,11 @@ void wxTangram::Render(void)
 	if(!m_wasMapInit) {
 		// Setup Tangram
 		std::string sceneFile = "scene.yaml";
-		m_map->loadSceneAsync(
-			sceneFile.c_str(), true, {}, nullptr,
-			{Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())}
+		std::vector<Tangram::SceneUpdate> updates;
+		updates.push_back(
+			Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())
 		);
+		m_map->loadSceneAsync(sceneFile, true, updates);
 
 		m_map->setupGL();
 		m_map->resize(GetSize().x, GetSize().y);
