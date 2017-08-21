@@ -4,7 +4,7 @@
 #include "../../common/platform_gl.h"
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
-#include "../../../core/include/tangram/map.h"
+#include "../../../core/include/tangram/tangram.h"
 
 // So that project using those map doesn't need to include own GLM
 #include "glm/gtc/type_ptr.hpp"
