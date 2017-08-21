@@ -21,6 +21,9 @@ if (CMAKE_COMPILER_IS_GNUCC)
     message(STATUS "USE CXX11_ABI")
     add_definitions("-D_GLIBCXX_USE_CXX11_ABI=1")
   endif()
+  if (GCC_VERSION VERSION_GREATER 7.0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-strict-aliasing")
+  endif()
 endif()
 
 check_unsupported_compiler_version()
@@ -36,6 +39,10 @@ if(TANGRAM_APPLICATION)
 
   get_mapzen_api_key(MAPZEN_API_KEY)
   add_definitions(-DMAPZEN_API_KEY="${MAPZEN_API_KEY}")
+
+  if($ENV{CIRCLE_BUILD_NUM})
+    add_definitions(-DBUILD_NUM_STRING="\($ENV{CIRCLE_BUILD_NUM}\)")
+  endif()
 
   find_package(OpenGL REQUIRED)
 
