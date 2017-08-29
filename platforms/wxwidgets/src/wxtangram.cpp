@@ -24,7 +24,6 @@ wxTangram::wxTangram(wxWindow *parent,
 	wxGLCanvas(parent, id, NULL, pos, size, style, name),
 	m_api(api),
 	m_ctx(new wxGLContext(this)),
-	m_map(new Tangram::Map(std::make_shared<Tangram::wxTangramPlatform>(this))),
 	m_renderTimer(this)
 {
 	// Mouse events
@@ -201,6 +200,10 @@ void wxTangram::Render(void)
 		updates.push_back(
 			Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())
 		);
+		
+		// m_map construct must be here or else destruct will crash app by trying to
+		// free GL buffers which weren't even allocated
+		m_map = new Tangram::Map(std::make_shared<Tangram::wxTangramPlatform>(this));
 		m_map->loadSceneAsync(sceneFile, true, updates);
 
 		m_map->setupGL();
