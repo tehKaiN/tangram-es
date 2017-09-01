@@ -169,8 +169,9 @@ void wxTangram::Prerender(void)
 			}
 			
 			// Clear context with default background color.
-			// TODO: something better
+			// TODO: I dunno why it doesn't update immediately to prevent black screen
 			Tangram::GL::clearColor(240/255.0f, 235/255.0f, 235/255.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 			SwapBuffers();
 			m_wasGlInit = true;
 		}
@@ -209,14 +210,11 @@ void wxTangram::Render(void)
 		m_map->setupGL();
 		m_map->resize(GetSize().x, GetSize().y);
 		
-		// This stuff must be here or else main project inheriting from
-		// wxTangram will have link errors about undefined reference to
-		// Tangram::GL functions. This is kinda hackish and could be fixed later.
-		glClearColor(240/255.0f, 235/255.0f, 235/255.0f, 1.0f);
 		m_wasMapInit = true;
 	}
 		
 	try {
+		// First draw takes about 2s and I guess there is nothing to do about it
 		m_map->update(delta);
 		m_map->render();
 	}
