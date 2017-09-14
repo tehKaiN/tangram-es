@@ -743,6 +743,11 @@ glm::mat4 Map::getViewProjectionMatrix(void)
 	return impl->view.getViewProjectionMatrix();
 }
 
+glm::vec3 Map::getViewPosition(void)
+{
+	return impl->view.getPosition();
+}
+
 void Map::setPixelScale(float _pixelsPerPoint) {
 
     impl->setPixelScale(_pixelsPerPoint);

@@ -225,6 +225,8 @@ public:
 		void lngLatToGlPosition(double _lng, double _lat, double *_x, double *_y);
 		
 		glm::mat4 getViewProjectionMatrix(void);
+		
+		glm::vec3 getViewPosition(void);
 
     // Add a tile source for adding drawable map data, which will be styled
     // according to the scene file using the provided data source name;
