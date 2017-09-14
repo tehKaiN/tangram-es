@@ -122,7 +122,7 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 		// but it's kinda trippy when controlling using PC mouse.
 		m_map->handleRotateGesture(
 			m_map->getViewportWidth()/2, m_map->getViewportHeight()/2,
-			(x - m_lastPosDown.x) * 0.01
+			-(x - m_lastPosDown.x) * 0.01
 		);
 		
 		// handleShoveGesture() doesn't work, idk why.
@@ -176,6 +176,9 @@ void wxTangram::Prerender(void)
 			m_wasGlInit = true;
 		}
 	
+		// This may be not the only ctx in app, so set glViewport accordingly
+		Tangram::GL::viewport(0, 0, GetSize().GetWidth(), GetSize().GetHeight());
+		
 		// Do the actual rendering
 		Render();
 		
