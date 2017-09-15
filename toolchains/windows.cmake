@@ -1,12 +1,21 @@
 # global compile options
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1y")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wignored-qualifiers -Wtype-limits -Wmissing-field-initializers")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fstack-protector -static")
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-zero-variadic-macro-arguments")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -lc++ -lc++abi")
+if(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -std=gnu++1y")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DRAPIDJSON_HAS_CXX11_RVALUE_REFS=1")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # Exceptions handler - required for yaml-cpp
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_USE_MATH_DEFINES") # required for geojson-vt-cpp
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1y")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wignored-qualifiers -Wtype-limits -Wmissing-field-initializers")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fstack-protector -static")
+	
+	if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		# Clang may be also used in MSVC-Clang toolchain and that will pass match above,
+		# But then clang works in clang-cl mode which emulates cl.exe and accepts MSVC args, not GNU-like
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-zero-variadic-macro-arguments")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -lc++ -lc++abi")
+	endif()
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
