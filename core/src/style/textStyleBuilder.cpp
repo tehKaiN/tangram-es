@@ -251,6 +251,9 @@ bool TextStyleBuilder::handleBoundaryLabel(const Feature& _feat, const DrawRule&
 }
 
 bool TextStyleBuilder::addFeature(const Feature& _feat, const DrawRule& _rule) {
+
+    if (!checkRule(_rule)) { return false; }
+
     TextStyle::Parameters params = applyRule(_rule, _feat.props, false);
 
     Label::Type labelType;
@@ -548,12 +551,25 @@ void TextStyleBuilder::addLineTextLabels(const Feature& _feat, const TextStyle::
     }
 }
 
+bool TextStyleBuilder::checkRule(const DrawRule& _rule) const {
+    if (_rule.hasParameterSet(StyleParamKey::text_font_family) ||
+        _rule.hasParameterSet(StyleParamKey::text_font_fill) ||
+        _rule.hasParameterSet(StyleParamKey::text_font_size) ||
+        _rule.hasParameterSet(StyleParamKey::text_font_stroke_color) ||
+        _rule.hasParameterSet(StyleParamKey::text_font_stroke_width) ||
+        _rule.hasParameterSet(StyleParamKey::text_font_style) ||
+        _rule.hasParameterSet(StyleParamKey::text_font_weight)) {
+        return true;
+    }
+    return false;
+}
+
 TextStyle::Parameters TextStyleBuilder::applyRule(const DrawRule& _rule,
                                                   const Properties& _props,
                                                   bool _iconText) const {
 
     const static std::string defaultWeight("400");
-    const static std::string defaultStyle("normal");
+    const static std::string defaultStyle("regular");
     const static std::string defaultFamily("default");
 
     TextStyle::Parameters p;
