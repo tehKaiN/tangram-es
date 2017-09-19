@@ -3,11 +3,7 @@ Ubuntu or Debian Linux
 
 ## Setup ##
 
-This project uses CMake (minimum version 3.0), you can download it [here](http://www.cmake.org/download/) or install it with apt-get.
-
-```bash
-sudo apt-get install cmake
-```
+This project uses CMake (minimum version 3.0), you can download it [here](http://www.cmake.org/download/).
 
 Make sure to update git submodules before you build:
 
@@ -15,14 +11,7 @@ Make sure to update git submodules before you build:
 git submodule update --init
 ```
 
-To build on Ubuntu or Debian you will need a C++ toolchain with support for C++14. GCC 4.9.2 (or higher) and Clang 3.4 (or higher) are known to work.
-
-You will also need to install development packages for libcurl, x11, and opengl. On Ubuntu 16.04 or Debian Stretch all the required packages can be installed with
-
-```bash
-sudo apt-get install make g++ pkg-config libcurl4-openssl-dev \
-  libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libgl1-mesa-dev
-```
+Currently, builds were tested under MinGW-TDM and MS Build Tools 2015 (recommended). You will need to install/build zlib and curl.
 
 The demo application uses the Mapzen vector tile service, so you will need a Mapzen API key to build and run the demo. 
 
@@ -35,48 +24,54 @@ The demo application uses the Mapzen vector tile service, so you will need a Map
 
 ## Build ##
 
-There are two ways to build the tangram-es library and demo application on Linux:
+ 1. Download zlib sources from https://zlib.net/
 
-### Command Line ###
+ 2. Download curl sources fom https://curl.haxx.se/download.html
 
-To build the executable demo application:
+### Clang ###
 
-```bash
-make linux
-```
+```cmake -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe -DCMAKE_BUILD_TYPE=Release -G "NMake Makefiles"  ../..```
+
+D:\prg\_git\tangram-es\core\deps\harfbuzz-icu-freetype\icu\common\ucnv2022.cpp(751,9):  error: ISO C++17 does not allow
+      'register' storage class specifier [-Wregister]
+
+### MSVC ###
+
+ 1. Launch Visual C++ 2015 x86 Native Build Tools Command Prompt
+
+ 2. Enter zlib directory and run ```nmake -f win32/Makefile.msc```
+ 
+ 3. Enter <curl dir>/winbuild and run nmake /f Makefile.vc mode=<static or dll>
+ 
+ 4. For static builds, go to <curl dir>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl\lib and change libcurl_a.lib to libcurl.lib
+ 
+ 5. Setup local variable `CMAKE_PREFIX_PATH` so that it includes ```<curl dir>\builds\libcurl-vc-x86-release-static-ipv6-sspi-winssl``` and ```<zlib dir>```. If ```echo %CMAKE_PREFIX_PATH%``` doesn't reflect changes, you must log out and log in to Windows.
+
+ 6. Create directory build/windows under tangram-es root directory.
+
+ 7. Enter command prompt and go to newly created directory.
+
+ 8. Setup CMake: ```cmake ../.. -G "NMake Makefiles"```
+
+ 9. Run build via nmake: ```nmake```
+
+### MinGW ###
+
+ 1. Create directory build/windows under tangram-es root directory.
+
+ 2. Enter command prompt and go to newly created directory.
+
+ 3. Setup CMake, forcing MinGW toolchain: ```cmake ../.. -G "MinGW Makefiles"```
+
+ 4. Run build via make: ```make```
 
 You can optionally use `make -j` to parallelize the build and append `DEBUG=1` or `RELEASE=1` to choose the build type.
 
-Then run it from the output folder:
+## Running app ##
 
-```bash
-cd build/linux/bin/ && ./tangram
-```
+App should now reside in `build/windows/bin directory`. If you built curl/zlib as dynamic libraries, you'll have to supply zlib.dll and curl.dll into same directory as .exe file.
 
 You can open a different YAML scene file by dragging and dropping it into the window, or passing it as an argument:
 
-```bash
-cd build/linux/bin/ && ./tangram -f /path/to/your/scene.yaml
+```tangram -f /path/to/your/scene.yaml
 ```
-
-Tangram-es can optionally be built with system-installed font and GLFW libraries. You can install these libraries with:
-
-```bash
-sudo apt-get install libglfw3-dev libicu-dev libfreetype6-dev libharfbuzz-dev
-```
-
-Then compile with the following options:
-
-```bash
-CMAKE_OPTIONS=" -DUSE_SYSTEM_GLFW_LIBS=1 -DUSE_SYSTEM_FONT_LIBS=1" make linux
-```
-
-### CLion ###
-
-You can also run and debug from CLion.
-
-After cloning and updating your git submodules, open CLion and __Import Project from Sources__. Select the root of this repo. Choose __Open Project__. Do not overwrite CMakeLists.txt.
-
-CLion will automatically set everything up, all you have to do is wait a minute for the project to get initialized. Then, select the __tangram__ run configuration and hit run/debug.
-
-![CLion Tangram Target](../../images/clion-tangram-target.png)
