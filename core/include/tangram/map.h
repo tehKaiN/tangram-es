@@ -222,6 +222,11 @@ public:
     // point is not visible on the screen, otherwise returns true
     bool lngLatToScreenPosition(double _lng, double _lat, double* _x, double* _y);
 		
+    // Given longitude, latitude and altitude (in meters) coordinates, set the output
+		// coordinates to the corresponding point in screen space (x right, y down);
+		// returns false if the point is not visible on the screen, otherwise returns true
+		bool lngLatAltToScreenPosition(double _lng, double _lat, double _alt, double* _x, double* _y);
+		
 		void lngLatToGlPosition(double _lng, double _lat, double *_x, double *_y);
 		
 		glm::mat4 getViewProjectionMatrix(void);

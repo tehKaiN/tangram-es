@@ -716,9 +716,13 @@ bool Map::screenPositionToLngLat(double _x, double _y, double* _lng, double* _la
 }
 
 bool Map::lngLatToScreenPosition(double _lng, double _lat, double* _x, double* _y) {
+    return lngLatAltToScreenPosition(_lng, _lat, 0, _x, _y);
+}
+
+bool Map::lngLatAltToScreenPosition(double _lng, double _lat, double _alt, double* _x, double* _y) {
     bool clipped = false;
 
-    glm::vec2 screenCoords = impl->view.lonLatToScreenPosition(_lng, _lat, clipped);
+    glm::vec2 screenCoords = impl->view.lonLatAltToScreenPosition(_lng, _lat, _alt, clipped);
 
     *_x = screenCoords.x;
     *_y = screenCoords.y;

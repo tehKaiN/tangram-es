@@ -425,16 +425,20 @@ void View::updateMatrices() {
 
 }
 
-glm::vec2 View::lonLatToScreenPosition(double lon, double lat, bool& clipped) const {
+glm::vec2 View::lonLatAltToScreenPosition(double lon, double lat, double alt, bool& clipped) const {
     glm::dvec2 meters = m_projection->LonLatToMeters({lon, lat});
-    glm::dvec4 lonLat(meters, 0.0, 1.0);
+    glm::dvec4 lonLatAlt(meters, alt, 1.0);
 
-    lonLat.x = lonLat.x - m_pos.x;
-    lonLat.y = lonLat.y - m_pos.y;
+    lonLatAlt.x = lonLatAlt.x - m_pos.x;
+    lonLatAlt.y = lonLatAlt.y - m_pos.y;
 
-    glm::vec2 screenPosition = worldToScreenSpace(m_viewProj, lonLat, {m_vpWidth, m_vpHeight}, clipped);
+    glm::vec2 screenPosition = worldToScreenSpace(m_viewProj, lonLatAlt, {m_vpWidth, m_vpHeight}, clipped);
 
     return screenPosition;
+}
+
+glm::vec2 View::lonLatToScreenPosition(double lon, double lat, bool& clipped) const {
+    return lonLatAltToScreenPosition(lon, lat, 0, clipped);
 }
 
 void View::getVisibleTiles(const std::function<void(TileID)>& _tileCb) const {
