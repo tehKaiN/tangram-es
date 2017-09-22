@@ -15,10 +15,19 @@
 namespace Tangram {
 
 void logMsg(const char* fmt, ...) {
+	// Direct displaying of strings via wxLogMessage makes funny chars
 	char bfr[2048];
 	va_list args;
 	va_start(args, fmt);
 	vsprintf(bfr, fmt, args);
+	
+	// Trim whitespace
+	char *p = &bfr[strlen(bfr)-1];
+	while(p != bfr && *p < 32)
+		--p;
+	*(p+1) = 0;
+	
+	// Display
 	wxLogMessage(bfr);
 	va_end(args);
 }
