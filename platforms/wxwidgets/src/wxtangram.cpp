@@ -53,12 +53,13 @@ void wxTangram::OnMouseWheel(wxMouseEvent &evt)
 {
 	if(!m_wasMapInit)
 		return;
-	if(evt.GetWheelAxis() != wxMOUSE_WHEEL_VERTICAL)
-		return;
+	// if(evt.GetWheelAxis() != wxMOUSE_WHEEL_VERTICAL)
+		// return;
 
 	double x = evt.GetX() * m_density;
 	double y = evt.GetY() * m_density;
-	int rotation = evt.GetWheelRotation() / evt.GetWheelDelta();
+	int delta = evt.GetWheelDelta() ? evt.GetWheelDelta() : 3;
+	int rotation = evt.GetWheelRotation() / delta;
 	m_map->handlePinchGesture(x, y, 1.0 + m_scrollSpanMultiplier * rotation, 0.f);
 }
 
