@@ -17,6 +17,7 @@ public:
 	          wxWindowID id = wxID_ANY,
 						const wxString& name = wxGLCanvasName,
 						const wxString& api = "",
+						const wxString& sceneFile = "scene.yaml",
 						const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
             long style = 0);
@@ -28,6 +29,7 @@ protected:
 	bool m_wasGlInit = false;
 	bool m_wasMapInit = false;
 	wxString m_api;
+	wxString m_sceneFile;
 	wxGLContext *m_ctx;
 	Tangram::Map* m_map = nullptr;
 	
@@ -57,10 +59,7 @@ private:
 	double m_lastTimeMoved;
 	double m_lastXVelocity;
 	double m_lastYVelocity;
-	
-	double m_tilt = 0;
-	double m_rotation = 0;
-	
+		
 	const double m_scrollSpanMultiplier = 0.1; // scaling for zoom and rotation
 	const double m_scrollDistanceMultiplier = 0.1; // scaling for shove
 };

@@ -18,11 +18,13 @@ wxTangram::wxTangram(wxWindow *parent,
 										wxWindowID id,
 										const wxString& name,
 										const wxString& api,
+										const wxString& sceneFile,
 										const wxPoint& pos,
 										const wxSize& size,
 										long style):
 	wxGLCanvas(parent, id, NULL, pos, size, style, name),
 	m_api(api),
+	m_sceneFile(sceneFile),
 	m_ctx(new wxGLContext(this)),
 	m_renderTimer(this)
 {
@@ -32,13 +34,13 @@ wxTangram::wxTangram(wxWindow *parent,
 	Bind(wxEVT_LEFT_UP, OnMouseUp, this);
 	Bind(wxEVT_MOTION, OnMouseMove, this);
 	Bind(wxEVT_MOUSEWHEEL, OnMouseWheel, this);
-	
+
 	// Resize event
 	Bind(wxEVT_SIZE, OnResize, this);
-	
+
 	// Render timer
 	Bind(wxEVT_TIMER, OnRenderTimer, this);
-	
+
 	// Start render timer
 	m_renderTimer.StartOnce(1000/60.0);
 }
@@ -51,12 +53,13 @@ void wxTangram::OnMouseWheel(wxMouseEvent &evt)
 {
 	if(!m_wasMapInit)
 		return;
-	if(evt.GetWheelAxis() != wxMOUSE_WHEEL_VERTICAL)
-		return;
+	// if(evt.GetWheelAxis() != wxMOUSE_WHEEL_VERTICAL)
+		// return;
 
 	double x = evt.GetX() * m_density;
 	double y = evt.GetY() * m_density;
-	int rotation = evt.GetWheelRotation() / evt.GetWheelDelta();
+	int delta = evt.GetWheelDelta() ? evt.GetWheelDelta() : 3;
+	int rotation = evt.GetWheelRotation() / delta;
 	m_map->handlePinchGesture(x, y, 1.0 + m_scrollSpanMultiplier * rotation, 0.f);
 }
 
@@ -72,7 +75,7 @@ void wxTangram::OnRenderTimer(wxTimerEvent &evt)
 {
 	wxStopWatch sw;
 	Refresh();
-	m_renderTimer.StartOnce(std::max(1.0, 1000/60.0 - sw.Time())); 
+	m_renderTimer.StartOnce(std::max(1.0, 1000/60.0 - sw.Time()));
 }
 
 void wxTangram::OnMouseUp(wxMouseEvent &evt)
@@ -124,13 +127,13 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 			m_map->getViewportWidth()/2, m_map->getViewportHeight()/2,
 			-(x - m_lastPosDown.x) * 0.01
 		);
+
 		
 		// handleShoveGesture() doesn't work, idk why.
-		m_tilt += (m_lastPosDown.y - y) * 0.001 * 2*M_PI;
-		m_tilt = clamp(m_tilt, 0.0, (90.0-12.0)/360.0*2*M_PI);
-		m_map->setTilt(m_tilt);
+		double tilt = m_map->getTilt() + (m_lastPosDown.y - y) * 0.001 * 2*M_PI;
+		tilt = clamp(tilt, 0.0, (90.0-12.0)/360.0*2*M_PI);
+		m_map->setTilt(tilt);
 	}
-
 	m_lastPosDown.x = x;
 	m_lastPosDown.y = y;
 	m_lastTimeMoved = time;
@@ -149,14 +152,14 @@ void wxTangram::Prerender(void)
 	// Make GL context access exclusive
 	if(m_renderMutex.TryLock() != wxMUTEX_NO_ERROR)
 		return;
-	
+
 	if(IsShown()) {
 		// Select GL context
 		if(!SetCurrent(*m_ctx)) {
 			m_renderMutex.Unlock();
 			return;
 		}
-		
+
 		// Load OpenGL
 		if(!m_wasGlInit) {
 			if (!gladLoadGL()) {
@@ -167,7 +170,7 @@ void wxTangram::Prerender(void)
 			else {
 				Tangram::logMsg("GLAD: Loaded OpenGL");
 			}
-			
+
 			// Clear context with default background color.
 			// TODO: I dunno why it doesn't update immediately to prevent black screen
 			Tangram::GL::clearColor(240/255.0f, 235/255.0f, 235/255.0f, 1.0f);
@@ -175,13 +178,13 @@ void wxTangram::Prerender(void)
 			SwapBuffers();
 			m_wasGlInit = true;
 		}
-	
+
 		// This may be not the only ctx in app, so set glViewport accordingly
 		Tangram::GL::viewport(0, 0, GetSize().GetWidth(), GetSize().GetHeight());
-		
+
 		// Do the actual rendering
 		Render();
-		
+
 		// Swap front and back buffers
 		SwapBuffers();
 	}
@@ -195,27 +198,26 @@ void wxTangram::Render(void)
 	double currentTime = wxGetUTCTimeMillis().ToDouble()/1000.0;
 	double delta = currentTime - m_lastTime;
 	m_lastTime = currentTime;
-	
+
 	// Render
 	if(!m_wasMapInit) {
 		// Setup Tangram
-		std::string sceneFile = "scene.yaml";
 		std::vector<Tangram::SceneUpdate> updates;
 		updates.push_back(
 			Tangram::SceneUpdate("global.sdk_mapzen_api_key", m_api.ToStdString())
 		);
-		
+
 		// m_map construct must be here or else destruct will crash app by trying to
 		// free GL buffers which weren't even allocated
 		m_map = new Tangram::Map(std::make_shared<Tangram::wxTangramPlatform>(this));
-		m_map->loadSceneAsync(sceneFile, true, updates);
+		m_map->loadSceneAsync(m_sceneFile.ToStdString(), true, updates);
 
 		m_map->setupGL();
 		m_map->resize(GetSize().x, GetSize().y);
-		
+
 		m_wasMapInit = true;
 	}
-		
+
 	try {
 		// First draw takes about 2s and I guess there is nothing to do about it
 		m_map->update(delta);
