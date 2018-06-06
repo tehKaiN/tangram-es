@@ -144,7 +144,7 @@ void UrlClient::curlLoop(uint32_t index) {
     curl_easy_setopt(handle, CURLOPT_TIMEOUT_MS, m_options.requestTimeoutMs);
     curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 20);
-#ifdef TANGRAM_WINDOWS
+#if defined(TANGRAM_WINDOWS) || defined(TANGRAM_WXWIDGETS)
 		curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 0L);
 		// Without it, resolving takes way too long
 		curl_easy_setopt(handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
