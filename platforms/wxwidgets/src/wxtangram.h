@@ -2,14 +2,13 @@
 #define _WX_TANGRAM_H_
 
 #include <mutex>
-#include "../../common/platform_gl.h"
+#include <memory>
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include "../../../core/include/tangram/tangram.h"
 
 // So that project using those map doesn't need to include own GLM
 #define GLM_ENABLE_EXPERIMENTAL
-#include <memory>
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/transform.hpp"
 

@@ -1,3 +1,4 @@
+#include "../../common/platform_gl.h"
 #include "wxtangram.h"
 #include <algorithm>
 #include "map.h"
@@ -202,7 +203,10 @@ void wxTangram::Render(void)
 		m_map = std::make_shared<Tangram::Map>(
 			std::make_shared<Tangram::wxTangramPlatform>(this)
 		);
-		m_map->loadSceneAsync(m_sceneFile.ToStdString(), true, updates);
+		Tangram::Url baseUrl("file:///");
+		baseUrl = Tangram::Url("file://" + wxGetCwd()).resolved(baseUrl);
+		Tangram::Url sceneUrl = Tangram::Url(m_sceneFile.ToStdString()).resolved(baseUrl);
+		m_map->loadSceneAsync(sceneUrl.string(), true, updates);
 
 		m_map->setupGL();
 		m_map->resize(GetSize().x, GetSize().y);
