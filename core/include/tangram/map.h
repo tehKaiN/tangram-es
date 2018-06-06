@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "glm/mat4x4.hpp"
 
 namespace Tangram {
 
@@ -221,6 +222,17 @@ public:
     // point is not visible on the screen, otherwise returns true
     bool lngLatToScreenPosition(double _lng, double _lat, double* _x, double* _y);
 
+    // Given longitude, latitude and altitude (in meters) coordinates, set the output 
+    // coordinates to the corresponding point in screen space (x right, y down); 
+    // returns false if the point is not visible on the screen, otherwise returns true 
+    bool lngLatAltToScreenPosition(double _lng, double _lat, double _alt, double* _x, double* _y);
+		
+    void lngLatToGlPosition(double _lng, double _lat, double *_x, double *_y); 
+     
+    glm::mat4 getViewProjectionMatrix(void); 
+
+    glm::vec3 getViewPosition(void);
+		
     // Add a tile source for adding drawable map data, which will be styled
     // according to the scene file using the provided data source name;
     void addTileSource(std::shared_ptr<TileSource> _source);

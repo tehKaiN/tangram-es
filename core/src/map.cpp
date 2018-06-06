@@ -720,9 +720,13 @@ bool Map::screenPositionToLngLat(double _x, double _y, double* _lng, double* _la
 }
 
 bool Map::lngLatToScreenPosition(double _lng, double _lat, double* _x, double* _y) {
+    return lngLatAltToScreenPosition(_lng, _lat, 0, _x, _y); 
+} 
+ 
+bool Map::lngLatAltToScreenPosition(double _lng, double _lat, double _alt, double* _x, double* _y) {
     bool clipped = false;
 
-    glm::vec2 screenCoords = impl->view.lonLatToScreenPosition(_lng, _lat, clipped);
+    glm::vec2 screenCoords = impl->view.lonLatAltToScreenPosition(_lng, _lat, _alt, clipped); 
 
     *_x = screenCoords.x;
     *_y = screenCoords.y;
@@ -732,6 +736,24 @@ bool Map::lngLatToScreenPosition(double _lng, double _lat, double* _x, double* _
     bool withinViewport = *_x >= 0. && *_x <= width && *_y >= 0. && *_y <= height;
 
     return !clipped && withinViewport;
+}
+
+void Map::lngLatToGlPosition(double _lng, double _lat, double *_x, double *_y) 
+{ 
+  auto posMeters = impl->view.getMapProjection().LonLatToMeters({_lng, _lat}); 
+  auto viewPos = impl->view.getPosition(); 
+  *_x = posMeters.x - viewPos.x; 
+  *_y = posMeters.y - viewPos.y; 
+} 
+ 
+glm::mat4 Map::getViewProjectionMatrix(void) 
+{ 
+  return impl->view.getViewProjectionMatrix(); 
+}
+
+glm::vec3 Map::getViewPosition(void) 
+{ 
+  return impl->view.getPosition(); 
 }
 
 void Map::setPixelScale(float _pixelsPerPoint) {
