@@ -23,6 +23,7 @@ public:
 						const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
             long style = 0);
+
 	Tangram::Map &GetMap();
 
 protected:
@@ -43,20 +44,20 @@ private:
 	void OnMouseUp(wxMouseEvent &evt);
 	void OnMouseMove(wxMouseEvent &evt);
 	void OnMouseWheel(wxMouseEvent &evt);
-	void OnRenderTimer(wxTimerEvent &evt);
+	void OnIdle(wxIdleEvent &evt);
 	void OnResize(wxSizeEvent &evt);
 
 	void Prerender(void);
 
 	// Stuff for rendering
 	std::mutex m_renderMutex;
-	wxTimer m_renderTimer;
 	double m_lastTime;
 
 	// Stuff for mouse nav
 	double m_density = 1.0;
 	wxPoint m_lastPosDown;
 	bool m_wasPanning = false;
+	bool m_isRenderEnabled = true;
 	double m_lastTimeMoved;
 	double m_lastXVelocity;
 	double m_lastYVelocity;

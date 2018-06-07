@@ -25,8 +25,7 @@ wxTangram::wxTangram(wxWindow *parent,
 	wxGLCanvas(parent, id, NULL, pos, size, style, name),
 	m_api(api),
 	m_sceneFile(sceneFile),
-	m_ctx(std::make_shared<wxGLContext>(this)),
-	m_renderTimer(this)
+	m_ctx(std::make_shared<wxGLContext>(this))
 {
 	// Mouse events
 	Bind(wxEVT_PAINT, OnPaint, this);
@@ -38,11 +37,15 @@ wxTangram::wxTangram(wxWindow *parent,
 	// Resize event
 	Bind(wxEVT_SIZE, OnResize, this);
 
-	// Render timer
-	Bind(wxEVT_TIMER, OnRenderTimer, this);
+	// Render on idle
+	Bind(wxEVT_IDLE, OnIdle, this);
 
-	// Start render timer
-	m_renderTimer.StartOnce(1000/60.0);
+	// Stop rendering on close
+	Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent &evt){
+		// Abort rendering on idle if main window gets destroyed
+		// Any wxGetApp().GetMainWindow() in Render() would return nullptr
+		m_isRenderEnabled = false;
+	});
 }
 
 Tangram::Map &wxTangram::GetMap() {
@@ -71,11 +74,9 @@ void wxTangram::OnResize(wxSizeEvent &evt)
 	Refresh();
 }
 
-void wxTangram::OnRenderTimer(wxTimerEvent &evt)
+void wxTangram::OnIdle(wxIdleEvent &evt)
 {
-	wxStopWatch sw;
 	Refresh();
-	m_renderTimer.StartOnce(std::max(1.0, 1000/60.0 - sw.Time()));
 }
 
 void wxTangram::OnMouseUp(wxMouseEvent &evt)
@@ -142,6 +143,10 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 
 void wxTangram::Prerender(void)
 {
+	if(!m_isRenderEnabled) {
+		return;
+	}
+
 	// Make GL context access exclusive
 	std::unique_lock<std::mutex> lock(m_renderMutex, std::try_to_lock);
 	if(!lock.owns_lock()) {
