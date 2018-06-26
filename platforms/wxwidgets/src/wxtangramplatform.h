@@ -1,6 +1,10 @@
 #pragma once
 
 #include <memory>
+#if defined(None)
+// Workaround against X11's macro
+#undef None
+#endif
 #include "platform.h"
 #include "../../common/urlClient.h"
 #include "wxtangram.h"

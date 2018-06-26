@@ -21,7 +21,9 @@ else()
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
+  # Ubuntu suffers from this:
+  # https://stackoverflow.com/questions/45168516/gcc-7-1-1-on-fedora-26-dumpversion-now-only-includes-major-version-by-default
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpfullversion -dumpversion
     OUTPUT_VARIABLE GCC_VERSION)
   string(REGEX MATCHALL "[0-9]+" GCC_VERSION_COMPONENTS ${GCC_VERSION})
   list(GET GCC_VERSION_COMPONENTS 0 GCC_MAJOR)
@@ -80,13 +82,15 @@ if(TANGRAM_APPLICATION)
     # only used when not using external lib
     -pthread
     ${OPENGL_LIBRARIES}
-		${CURL_LIBRARIES}
-		${wxWidgets_LIBRARIES}
-	)
-	# For CURL static - Windows only!
-	target_link_libraries(${EXECUTABLE_NAME}
-		wsock32 ws2_32 crypt32 wldap32
-	)
+    ${CURL_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
+  )
+IF(WIN32)
+  # For CURL static - Windows only!
+  target_link_libraries(${EXECUTABLE_NAME}
+    wsock32 ws2_32 crypt32 wldap32
+  )
+ENDIF()
 
   add_resources(${EXECUTABLE_NAME} "${PROJECT_SOURCE_DIR}/scenes")
 	

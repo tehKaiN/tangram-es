@@ -28,17 +28,17 @@ wxTangram::wxTangram(wxWindow *parent,
 	m_ctx(std::make_shared<wxGLContext>(this))
 {
 	// Mouse events
-	Bind(wxEVT_PAINT, OnPaint, this);
-	Bind(wxEVT_LEFT_DOWN, OnMouseDown, this);
-	Bind(wxEVT_LEFT_UP, OnMouseUp, this);
-	Bind(wxEVT_MOTION, OnMouseMove, this);
-	Bind(wxEVT_MOUSEWHEEL, OnMouseWheel, this);
+	Bind(wxEVT_PAINT, &wxTangram::OnPaint, this);
+	Bind(wxEVT_LEFT_DOWN, &wxTangram::OnMouseDown, this);
+	Bind(wxEVT_LEFT_UP, &wxTangram::OnMouseUp, this);
+	Bind(wxEVT_MOTION, &wxTangram::OnMouseMove, this);
+	Bind(wxEVT_MOUSEWHEEL, &wxTangram::OnMouseWheel, this);
 
 	// Resize event
-	Bind(wxEVT_SIZE, OnResize, this);
+	Bind(wxEVT_SIZE, &wxTangram::OnResize, this);
 
 	// Render on idle
-	Bind(wxEVT_IDLE, OnIdle, this);
+	Bind(wxEVT_IDLE, &wxTangram::OnIdle, this);
 
 	// Stop rendering on close
 	Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent &evt){
