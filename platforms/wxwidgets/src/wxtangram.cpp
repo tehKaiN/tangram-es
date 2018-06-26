@@ -2,7 +2,7 @@
 #include "wxtangram.h"
 #include <algorithm>
 #include "map.h"
-#include "wxTangramPlatform.h"
+#include "wxtangramplatform.h"
 #include "data/clientGeoJsonSource.h"
 
 template <typename T> T clamp(T x, T min, T max)
