@@ -4,6 +4,7 @@
 #include "map.h"
 #include "wxtangramplatform.h"
 #include "data/clientGeoJsonSource.h"
+#include <wx/wx.h>
 
 template <typename T> T clamp(T x, T min, T max)
 {
@@ -28,11 +29,12 @@ wxTangram::wxTangram(wxWindow *parent,
 	m_ctx(std::make_shared<wxGLContext>(this))
 {
 	// Mouse events
-	Bind(wxEVT_PAINT, &wxTangram::OnPaint, this);
-	Bind(wxEVT_LEFT_DOWN, &wxTangram::OnMouseDown, this);
-	Bind(wxEVT_LEFT_UP, &wxTangram::OnMouseUp, this);
-	Bind(wxEVT_MOTION, &wxTangram::OnMouseMove, this);
-	Bind(wxEVT_MOUSEWHEEL, &wxTangram::OnMouseWheel, this);
+	Bind(wxEVT_PAINT, OnPaint, this);
+	Bind(wxEVT_LEFT_DOWN, OnMouseDown, this);
+	Bind(wxEVT_LEFT_UP, OnMouseUp, this);
+	Bind(wxEVT_MOTION, OnMouseMove, this);
+	Bind(wxEVT_MOUSEWHEEL, OnMouseWheel, this);
+	Bind(wxEVT_MIDDLE_DOWN, OnMouseWheelDown, this);
 
 	// Resize event
 	Bind(wxEVT_SIZE, &wxTangram::OnResize, this);
@@ -64,6 +66,11 @@ void wxTangram::OnMouseWheel(wxMouseEvent &evt)
 	int delta = evt.GetWheelDelta() ? evt.GetWheelDelta() : 3;
 	int rotation = evt.GetWheelRotation() / delta;
 	m_map->handlePinchGesture(x, y, 1.0 + m_scrollSpanMultiplier * rotation, 0.f);
+}
+
+void wxTangram::OnMouseWheelDown(wxMouseEvent &evt)
+{
+	m_lastYDownAfterMiddleDown.y = evt.GetY();
 }
 
 void wxTangram::OnResize(wxSizeEvent &evt)
@@ -111,6 +118,8 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 	double y = evt.GetY() * m_density;
 	double time = wxGetUTCTimeMillis().ToDouble()/1000.0;
 
+	static long cnt = 0;
+
 	if (evt.LeftIsDown()) {
 
 		if (m_wasPanning) {
@@ -134,6 +143,16 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 		double tilt = m_map->getTilt() + (m_lastPosDown.y - y) * 0.001 * 2*M_PI;
 		tilt = clamp(tilt, 0.0, (90.0-12.0)/360.0*2*M_PI);
 		m_map->setTilt(tilt);
+	}
+	// alternative zooming - scroll doesn't work sometimes [ don't know why atm ]
+	if(evt.MiddleIsDown()){
+		if(!cnt){
+			cnt++;
+			m_map->handlePinchGesture(x, y, 1.0, 0.f);
+		}
+		else{
+			m_map->handlePinchGesture(x, m_lastYDownAfterMiddleDown.y, 1.0 + 0.01*(m_lastPosDown.y - y), 0.f);
+		}
 	}
 	m_lastPosDown.x = x;
 	m_lastPosDown.y = y;

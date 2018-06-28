@@ -48,6 +48,7 @@ private:
 	void OnMouseUp(wxMouseEvent &evt);
 	void OnMouseMove(wxMouseEvent &evt);
 	void OnMouseWheel(wxMouseEvent &evt);
+	void OnMouseWheelDown(wxMouseEvent &evt);
 	void OnIdle(wxIdleEvent &evt);
 	void OnResize(wxSizeEvent &evt);
 
@@ -60,6 +61,7 @@ private:
 	// Stuff for mouse nav
 	double m_density = 1.0;
 	wxPoint m_lastPosDown;
+	wxPoint m_lastYDownAfterMiddleDown;
 	bool m_wasPanning = false;
 	bool m_isRenderEnabled = true;
 	double m_lastTimeMoved;
