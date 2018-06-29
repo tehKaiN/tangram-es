@@ -29,12 +29,12 @@ wxTangram::wxTangram(wxWindow *parent,
 	m_ctx(std::make_shared<wxGLContext>(this))
 {
 	// Mouse events
-	Bind(wxEVT_PAINT, OnPaint, this);
-	Bind(wxEVT_LEFT_DOWN, OnMouseDown, this);
-	Bind(wxEVT_LEFT_UP, OnMouseUp, this);
-	Bind(wxEVT_MOTION, OnMouseMove, this);
-	Bind(wxEVT_MOUSEWHEEL, OnMouseWheel, this);
-	Bind(wxEVT_MIDDLE_DOWN, OnMouseWheelDown, this);
+	Bind(wxEVT_PAINT, &wxTangram::OnPaint, this);
+	Bind(wxEVT_LEFT_DOWN, &wxTangram::OnMouseDown, this);
+	Bind(wxEVT_LEFT_UP, &wxTangram::OnMouseUp, this);
+	Bind(wxEVT_MOTION, &wxTangram::OnMouseMove, this);
+	Bind(wxEVT_MOUSEWHEEL, &wxTangram::OnMouseWheel, this);
+	Bind(wxEVT_MIDDLE_DOWN, &wxTangram::OnMouseWheelDown, this);
 
 	// Resize event
 	Bind(wxEVT_SIZE, &wxTangram::OnResize, this);
