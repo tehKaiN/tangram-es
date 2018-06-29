@@ -228,9 +228,11 @@ void wxTangram::Render(void)
 			std::make_shared<Tangram::wxTangramPlatform>(this)
 		);
 		Tangram::Url baseUrl("file:///");
-		baseUrl = Tangram::Url("file://" + wxGetCwd()).resolved(baseUrl);
-		Tangram::Url sceneUrl = Tangram::Url(m_sceneFile.ToStdString()).resolved(baseUrl);
-		m_map->loadSceneAsync(sceneUrl.string(), true, updates);
+		baseUrl = Tangram::Url(
+			"file://" + wxGetCwd().ToStdString() + "/" +
+			m_sceneFile.ToStdString()
+		).resolved(baseUrl);
+		m_map->loadSceneAsync(baseUrl.string(), true, updates);
 
 		m_map->setupGL();
 		m_map->resize(GetSize().x, GetSize().y);
