@@ -20,6 +20,7 @@ class wxTangram: public wxGLCanvas
 {
 public:
 	wxTangram(wxWindow *parent,
+						const wxGLAttributes& attribs,
 	          wxWindowID id = wxID_ANY,
 						const wxString& name = wxGLCanvasName,
 						const wxString& api = "",

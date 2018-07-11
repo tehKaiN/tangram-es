@@ -16,6 +16,7 @@ template <typename T> T clamp(T x, T min, T max)
 }
 
 wxTangram::wxTangram(wxWindow *parent,
+										const wxGLAttributes& attribs,
 										wxWindowID id,
 										const wxString& name,
 										const wxString& api,
@@ -23,7 +24,7 @@ wxTangram::wxTangram(wxWindow *parent,
 										const wxPoint& pos,
 										const wxSize& size,
 										long style):
-	wxGLCanvas(parent, id, NULL, pos, size, style, name),
+	wxGLCanvas(parent, attribs, id, pos, size, style, name),
 	m_api(api),
 	m_sceneFile(sceneFile),
 	m_ctx(std::make_shared<wxGLContext>(this))
