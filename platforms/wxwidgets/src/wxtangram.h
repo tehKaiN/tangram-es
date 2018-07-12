@@ -57,7 +57,7 @@ private:
 
 	// Stuff for rendering
 	std::mutex m_renderMutex;
-	double m_lastTime;
+	wxLongLong m_lastTime;
 
 	// Stuff for mouse nav
 	double m_density = 1.0;
@@ -65,7 +65,7 @@ private:
 	wxPoint m_lastYDownAfterMiddleDown;
 	bool m_wasPanning = false;
 	bool m_isRenderEnabled = true;
-	double m_lastTimeMoved;
+	wxLongLong m_lastTimeMoved;
 	double m_lastXVelocity;
 	double m_lastYVelocity;
 

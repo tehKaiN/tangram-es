@@ -108,7 +108,7 @@ void wxTangram::OnMouseDown(wxMouseEvent &evt)
 	if(!m_wasMapInit)
 		return;
 	if(evt.LeftDown())
-		m_lastTimeMoved = wxGetUTCTimeMillis().ToDouble()/1000.0;
+		m_lastTimeMoved = wxGetUTCTimeMillis();
 }
 
 void wxTangram::OnMouseMove(wxMouseEvent &evt)
@@ -117,7 +117,8 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 		return;
 	double x = evt.GetX() * m_density;
 	double y = evt.GetY() * m_density;
-	double time = wxGetUTCTimeMillis().ToDouble()/1000.0;
+	wxLongLong time = wxGetUTCTimeMillis();
+	double delta = (time - m_lastTimeMoved).ToDouble() / 1000.0;
 
 	static long cnt = 0;
 
@@ -128,8 +129,8 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 		}
 
 		m_wasPanning = true;
-		m_lastXVelocity = (x - m_lastPosDown.x) / (time - m_lastTimeMoved);
-		m_lastYVelocity = (y - m_lastPosDown.y) / (time - m_lastTimeMoved);
+		m_lastXVelocity = (x - m_lastPosDown.x) / delta;
+		m_lastYVelocity = (y - m_lastPosDown.y) / delta;
 	}
 	else if(evt.RightIsDown()) {
 		// Could be rotating around any point, e.g. one where RMB was pressed,
@@ -158,7 +159,6 @@ void wxTangram::OnMouseMove(wxMouseEvent &evt)
 	m_lastPosDown.x = x;
 	m_lastPosDown.y = y;
 	m_lastTimeMoved = time;
-
 }
 
 void wxTangram::Prerender(void)
@@ -203,16 +203,16 @@ void wxTangram::Prerender(void)
 		// Do the actual rendering
 		Render();
 
-		// Swap front and back buffers
-		SwapBuffers();
+			// Swap front and back buffers
+			SwapBuffers();
+		}
 	}
-}
 
 void wxTangram::Render(void)
 {
 	// Get delta between frames
-	double currentTime = wxGetUTCTimeMillis().ToDouble()/1000.0;
-	double delta = currentTime - m_lastTime;
+	wxLongLong currentTime = wxGetUTCTimeMillis();
+	double delta = (currentTime - m_lastTime).ToDouble()/1000.0;
 	m_lastTime = currentTime;
 
 	// Render
