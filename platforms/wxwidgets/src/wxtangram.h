@@ -40,7 +40,7 @@ protected:
 	std::shared_ptr<wxGLContext> m_ctx;
 	std::shared_ptr<Tangram::Map> m_map;
 
-	virtual void Render(void);
+	virtual bool Render(void);
 
 private:
 	// Event handlers

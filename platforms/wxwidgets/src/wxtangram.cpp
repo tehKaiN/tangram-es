@@ -201,14 +201,14 @@ void wxTangram::Prerender(void)
 		glViewport(0, 0, GetSize().GetWidth(), GetSize().GetHeight());
 
 		// Do the actual rendering
-		Render();
-
+		if(Render()) {
 			// Swap front and back buffers
 			SwapBuffers();
 		}
 	}
+}
 
-void wxTangram::Render(void)
+bool wxTangram::Render(void)
 {
 	// Get delta between frames
 	wxLongLong currentTime = wxGetUTCTimeMillis();
@@ -248,7 +248,9 @@ void wxTangram::Render(void)
 	}
 	catch(...) {
 		Tangram::logMsg("TANGRAM: Unknown render error");
+		return false;
 	}
+	return true;
 }
 
 void wxTangram::OnPaint(wxPaintEvent &evt)
