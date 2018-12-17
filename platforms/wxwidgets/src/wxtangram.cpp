@@ -173,39 +173,40 @@ void wxTangram::Prerender(void)
 		return;
 	}
 
-	if(IsShown()) {
-		// Select GL context
-		if(!SetCurrent(*m_ctx)) {
+	// Select GL context
+	if(!SetCurrent(*m_ctx)) {
+		return;
+	}
+
+	// Load OpenGL
+	if(!m_wasGlInit) {
+		if (!gladLoadGL()) {
+			Tangram::logMsg("GLAD: Failed to initialize OpenGL context");
 			return;
 		}
-
-		// Load OpenGL
-		if(!m_wasGlInit) {
-			if (!gladLoadGL()) {
-				Tangram::logMsg("GLAD: Failed to initialize OpenGL context");
-				return;
-			}
-			else {
-				Tangram::logMsg("GLAD: Loaded OpenGL");
-			}
-
-			// Clear context with default background color.
-			// TODO: I dunno why it doesn't update immediately to prevent black screen
-			glClearColor(240/255.0f, 235/255.0f, 235/255.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-			SwapBuffers();
-			m_wasGlInit = true;
+		else {
+			Tangram::logMsg("GLAD: Loaded OpenGL");
 		}
 
-		// This may be not the only ctx in app, so set glViewport accordingly
-		glViewport(0, 0, GetSize().GetWidth(), GetSize().GetHeight());
-
-		// Do the actual rendering
-		if(Render()) {
-			// Swap front and back buffers
-			SwapBuffers();
-		}
+		// Clear context with default background color.
+		// TODO: I dunno why it doesn't update immediately to prevent black screen
+		glClearColor(240/255.0f, 235/255.0f, 235/255.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		SwapBuffers();
+		m_wasGlInit = true;
 	}
+
+	// if(IsShown()) {
+
+	// This may be not the only ctx in app, so set glViewport accordingly
+	glViewport(0, 0, GetSize().GetWidth(), GetSize().GetHeight());
+
+	// Do the actual rendering
+	if(Render()) {
+		// Swap front and back buffers
+		SwapBuffers();
+	}
+	// }
 }
 
 bool wxTangram::Render(void)
@@ -244,13 +245,22 @@ bool wxTangram::Render(void)
 	try {
 		// First draw takes about 2s and I guess there is nothing to do about it
 		m_map->update(delta);
-		m_map->render();
+		if(m_showMap) {
+			m_map->render();
+		}
+		else {
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
 	}
 	catch(...) {
 		Tangram::logMsg("TANGRAM: Unknown render error");
 		return false;
 	}
 	return true;
+}
+
+void wxTangram::ShowMap(bool show) {
+	m_showMap = show;
 }
 
 void wxTangram::OnPaint(wxPaintEvent &evt)

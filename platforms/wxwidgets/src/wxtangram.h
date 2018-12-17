@@ -31,6 +31,8 @@ public:
 
 	Tangram::Map &GetMap();
 
+	void ShowMap(bool show = true);
+
 protected:
 	// Core stuff
 	bool m_wasGlInit = false;
@@ -58,6 +60,7 @@ private:
 	// Stuff for rendering
 	std::mutex m_renderMutex;
 	wxLongLong m_lastTime;
+	bool m_showMap;
 
 	// Stuff for mouse nav
 	double m_density = 1.0;
