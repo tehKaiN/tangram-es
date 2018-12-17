@@ -28,7 +28,7 @@ void logMsg(const char* fmt, ...) {
 	*(p+1) = 0;
 
 	// Display
-	wxLogMessage(bfr);
+	wxLogDebug(bfr);
 	va_end(args);
 }
 
