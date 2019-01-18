@@ -414,7 +414,11 @@ void RenderState::generateQuadIndexBuffer() {
 bool RenderState::framebuffer(GLuint handle) {
     if (!m_framebuffer.set || m_framebuffer.handle != handle) {
         m_framebuffer = { handle, true };
-        GL::bindFramebuffer(GL_FRAMEBUFFER, handle);
+        GLint fb;
+        GL::getIntegerv(GL_FRAMEBUFFER_BINDING, &fb);
+        if(fb != handle) {
+            GL::bindFramebuffer(GL_FRAMEBUFFER, handle);
+        }
         return false;
     }
     return true;

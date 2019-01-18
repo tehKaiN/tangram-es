@@ -53,8 +53,8 @@ void loadExtensions() {
     }
 
     supportsMapBuffer = isAvailable("mapbuffer");
-    supportsVAOs = isAvailable("vertex_array_object");
-    supportsTextureNPOT = isAvailable("texture_non_power_of_two");
+    // supportsVAOs = isAvailable("vertex_array_object");
+    // supportsTextureNPOT = isAvailable("texture_non_power_of_two");
     supportsGLRGBA8OES = isAvailable("rgb8_rgba8");
 
     LOG("Driver supports map buffer: %d", supportsMapBuffer);

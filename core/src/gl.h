@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(TANGRAM_ANDROID) || defined(TANGRAM_RPI) || defined(TANGRAM_IOS)
+#if defined(TANGRAM_ANDROID) || defined(TANGRAM_RPI) || defined(TANGRAM_IOS) || defined(TANGRAM_WXWIDGETS)
 typedef long GLsizeiptr;
 typedef long GLintptr;
 #elif defined(TANGRAM_TIZEN)
