@@ -38,10 +38,21 @@ extern PFNGLGENVERTEXARRAYSOESPROC glGenVertexArraysOESEXT;
 #define glBindVertexArray glBindVertexArrayAPPLE
 #endif // TANGRAM_OSX
 
+#if defined TANGRAM_WINDOWS
+#define GLFW_INCLUDE_NONE
+#include <glad/glad.h>
+// Add missing stuff
+#define glDepthRangef(a, b) glDepthRange((double)(a), (double)(b))
+#define glClearDepthf(a) glClearDepth((double)(a))
+#endif // defined(TANGRAM_WINDOWS) || defined(TANGRAM_WXWIDGETS)
+
 #ifdef TANGRAM_LINUX
 #define GL_GLEXT_PROTOTYPES
-#include <GLFW/glfw3.h>
 #endif // TANGRAM_LINUX
+
+#if defined(TANGRAM_WINDOWS) || defined(TANGRAM_LINUX)
+#include <GLFW/glfw3.h>
+#endif // defined(TANGRAM_WINDOWS) || defined(TANGRAM_LINUX)
 
 #ifdef TANGRAM_RPI
 // Broadcom library for direct GPU access

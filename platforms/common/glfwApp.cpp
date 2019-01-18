@@ -3,7 +3,12 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_stl.h"
+#ifdef TANGRAM_WINDOWS
+#define GLFW_INCLUDE_NONE
+#include <glad/glad.h>
+#else
 #define GLFW_INCLUDE_GLEXT
+#endif
 #include <GLFW/glfw3.h>
 #include <cstdlib>
 #include <atomic>
@@ -159,6 +164,9 @@ void create(std::shared_ptr<Platform> p, int w, int h) {
 
     // Make the main_window's context current
     glfwMakeContextCurrent(main_window);
+#ifdef TANGRAM_WINDOWS
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+#endif
     glfwSwapInterval(1); // Enable vsync
 
     // Set input callbacks
