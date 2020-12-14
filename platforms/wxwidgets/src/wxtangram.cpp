@@ -230,9 +230,12 @@ bool wxTangram::Render(void)
 			std::make_shared<Tangram::wxTangramPlatform>(this)
 		);
 		Tangram::Url baseUrl("file:///");
+
+		// Here was auto resolving using wxGetCwd().ToStdString(), but sometimes
+		// absolute paths are passed (e.g. when running as installed linux path),
+		// so on linux platforms be sure to resolve path properly.
 		baseUrl = Tangram::Url(
-			"file://" + wxGetCwd().ToStdString() + "/" +
-			m_sceneFile.ToStdString()
+			"file://" + m_sceneFile.ToStdString()
 		).resolved(baseUrl);
 		m_map->loadSceneAsync(baseUrl.string(), true, updates);
 

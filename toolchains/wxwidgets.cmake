@@ -10,7 +10,7 @@ else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fstack-protector")
 	# Static build
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -DCURL_STATICLIB")
-	
+
 	if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# Clang may be also used in MSVC-Clang toolchain and that will pass match above,
 		# But then clang works in clang-cl mode which emulates cl.exe and accepts MSVC args, not GNU-like
@@ -30,10 +30,10 @@ if (CMAKE_COMPILER_IS_GNUCC)
   list(GET GCC_VERSION_COMPONENTS 1 GCC_MINOR)
 
   message(STATUS "Using gcc ${GCC_VERSION}")
-  if (GCC_VERSION VERSION_GREATER 5.1)
-    message(STATUS "USE CXX11_ABI")
-    add_definitions("-D_GLIBCXX_USE_CXX11_ABI=1")
-  endif()
+  # if (GCC_VERSION VERSION_GREATER 5.1)
+  #   message(STATUS "USE CXX11_ABI")
+  #   add_definitions("-D_GLIBCXX_USE_CXX11_ABI=1")
+  # endif()
 endif()
 
 check_unsupported_compiler_version()
@@ -49,20 +49,20 @@ if(TANGRAM_APPLICATION)
 
 	get_nextzen_api_key(NEXTZEN_API_KEY)
   add_definitions(-DNEXTZEN_API_KEY="${NEXTZEN_API_KEY}")
-	
+
   if($ENV{CIRCLE_BUILD_NUM})
     add_definitions(-DBUILD_NUM_STRING="\($ENV{CIRCLE_BUILD_NUM}\)")
   endif()
-	
+
   find_package(OpenGL REQUIRED)
 	find_package(CURL REQUIRED)
-	
+
 	# wxWidgets
 	find_package(wxWidgets REQUIRED gl adv core base)
 	include(${wxWidgets_USE_FILE})
-	
+
 	set(LIB_PATH "${CMAKE_BINARY_DIR}/lib")
-	
+
   add_library(${EXECUTABLE_NAME}
     ${PROJECT_SOURCE_DIR}/platforms/wxwidgets/src/wxtangram.cpp
     ${PROJECT_SOURCE_DIR}/platforms/wxwidgets/src/wxtangramplatform.cpp
@@ -70,13 +70,13 @@ if(TANGRAM_APPLICATION)
     ${PROJECT_SOURCE_DIR}/platforms/common/urlClient.cpp
     ${PROJECT_SOURCE_DIR}/platforms/common/glad.c
   )
-		
+
   target_include_directories(${EXECUTABLE_NAME}
     PUBLIC
     ${PROJECT_SOURCE_DIR}/platforms/common
 		${CURL_INCLUDE_DIRS}
 	)
-		
+
   target_link_libraries(${EXECUTABLE_NAME}
     ${CORE_LIBRARY}
     # only used when not using external lib
@@ -93,5 +93,5 @@ IF(WIN32)
 ENDIF()
 
   add_resources(${EXECUTABLE_NAME} "${PROJECT_SOURCE_DIR}/scenes")
-	
+
 endif()
